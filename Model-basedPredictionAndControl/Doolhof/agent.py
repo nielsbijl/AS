@@ -1,8 +1,10 @@
 from policy import policy
+from doolhof import doolhof
 
 
 class agent:
-    def __init__(self, policy: policy):
+    def __init__(self, doolhof: doolhof, policy: policy):
+        self.doolhof = doolhof
         self.policy = policy
 
     def valueFunction(self):
