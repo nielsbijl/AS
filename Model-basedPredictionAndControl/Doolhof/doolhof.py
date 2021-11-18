@@ -12,18 +12,13 @@ class doolhof:
                         [0, 0, 0, 0],
                         [0, 0, 0, 0]]
         self.state = state
+        self.action = {0: (lambda q: (q[0], q[1] + 1)),
+                       1: (lambda q: (q[0] + 1, q[1])),
+                       2: (lambda q: (q[0], q[1] - 1)),
+                       3: (lambda q: (q[0] - 1, q[1]))}
 
     def step(self, state: state, action: int) -> state:
-        if action == 0:  # move up
-            newPos = (state.position[0], state.position[1] + 1)
-            newSate = state(newPos, )
-            pass
-        elif action == 1:  # move right
-            pass
-        elif action == 2:  # move down
-            pass
-        else:  # move left
-            pass
+        pass
 
     def __str__(self):
         return "map: %s \n rewards: %s \n state: %s" % (self.map, self.rewards, self.state)
