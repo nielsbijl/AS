@@ -21,10 +21,10 @@ class doolhof:
                        1: (lambda q: (q[0] + 1, q[1])),
                        2: (lambda q: (q[0], q[1] - 1)),
                        3: (lambda q: (q[0] - 1, q[1]))}
-        self.actionChance = {0: 0.7,
-                             1: 0.1,
-                             2: 0.1,
-                             3: 0.1}
+        self.actionConsequenceChance = {0: 0.7,
+                                        1: 0.1,
+                                        2: 0.1,
+                                        3: 0.1}
 
     def step(self, state: state, action: int) -> state:
         newPos = self.action[action](state.position)
@@ -42,10 +42,10 @@ class doolhof:
             state.done = False
         return state
 
-    def run(self, agent):
+    def run(self, agent, deterministic: bool = True):
         print(self.state.position)
         while not self.state.done:
-            agent.valueIteration(discount=0.9, threshhold=0.01)
+            agent.valueIteration(discount=0.9, threshhold=0.01, deterministic=deterministic)
             actions = agent.policy.selectAction(pos=self.state.position, discount=0.9)
             action = actions[0]
             self.step(state=self.state, action=action)

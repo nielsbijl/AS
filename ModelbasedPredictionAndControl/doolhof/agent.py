@@ -18,27 +18,21 @@ class agent:
         reward = self.doolhof.rewards[index[0]][index[1]]
         return reward + discount * value
 
-    def valueCalculate(self, location: tuple, iteration: int, discount: float = 1, deterministic: bool = False):
+    def valueCalculate(self, location: tuple, iteration: int, discount: float = 1, deterministic: bool = True):
         """Een valuefunction dit is een mapping van states naar values.
          Hiervoor kan je dezelfde datastructuur aanhouden als bij de omgeving (e.g. een lijst)."""
         values = []
         actions = self.doolhof.action.keys()
         for action in actions:
-            value = self.bellmanEquation(location, action, discount)
-            # if not deterministic:
-            #     sum = 0
-            #     for secondAction in actions:
-            #         pos = self.doolhof.action[secondAction](location)
-            #         index = self.doolhof.coordsToIndex(pos)
-            #         if not self.doolhof.canIGoThere(index):
-            #             index = self.doolhof.coordsToIndex(location)
-            #         value = self.doolhof.values[index[0]][index[1]]
-            #         reward = self.doolhof.rewards[index[0]][index[1]]
-            #         sum += self.doolhof.actionChance[secondAction] * (reward + discount * value)
-            #     values.append(sum)
-            # else:
-            #     values.append(reward + discount * value)
-            values.append(value)
+            if not deterministic:
+                sum = 0
+                for possibleNextState in actions:
+                    value = self.bellmanEquation(location, possibleNextState, discount)
+                    sum += (self.doolhof.actionConsequenceChance[possibleNextState] * value)
+                values.append(sum)
+            else:
+                value = self.bellmanEquation(location, action, discount)
+                values.append(value)
 
         return max(values)
 
@@ -46,7 +40,7 @@ class agent:
         """Een functie die een actie kiest op basis van een policy en een state"""
         pass
 
-    def valueIteration(self, discount: float, threshhold=0.01):
+    def valueIteration(self, discount: float, threshhold=0.01, deterministic: bool = True):
         """Een implementatie van value iteration"""
         newValues = copy.deepcopy(self.doolhof.values)
         done = False
@@ -59,7 +53,7 @@ class agent:
                 for x in range(width):
                     index = self.doolhof.coordsToIndex((x, y))
                     value = self.valueCalculate(location=(x, y), discount=discount,
-                                                iteration=iteration)
+                                                iteration=iteration, deterministic=deterministic)
                     if self.doolhof.end[index[0]][index[1]]:
                         value = 0
                     newValues[index[0]][index[1]] = value
