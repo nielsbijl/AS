@@ -47,7 +47,7 @@ class doolhof:
         while not self.state.done:
             agent.valueIteration(discount=0.9, threshhold=0.01)
             actions = agent.policy.selectAction(pos=self.state.position, discount=0.9)
-            action = random.choice(actions)
+            action = actions[0]
             self.step(state=self.state, action=action)
             print(self.state.position)
 
@@ -56,6 +56,12 @@ class doolhof:
 
     def indexToCoords(self, index: tuple):
         return index[1], len(self.rewards) - index[0] - 1
+
+    def canIGoThere(self, index: tuple):
+        if (index[0] < 0 or index[1] < 0) or (
+                index[0] > (len(self.values) - 1) or index[1] > (len(self.values) - 1)):
+            return False
+        return True
 
     def __str__(self):
         return "map: %s \n rewards: %s \n state: %s" % (self.values, self.rewards, self.state)

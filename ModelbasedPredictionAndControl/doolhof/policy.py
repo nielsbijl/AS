@@ -13,7 +13,7 @@ class policy:
         # pos = state.position
         for i in self.doolhof.action.keys():
             index = self.doolhof.coordsToIndex(self.doolhof.action[i](pos))
-            if (index[0] < 0 or index[1] < 0) or (index[0] > (len(self.doolhof.values) - 1) or index[1] > (len(self.doolhof.values) - 1)):
+            if not self.doolhof.canIGoThere(index):
                 index = self.doolhof.coordsToIndex(pos)
             options[i] = self.doolhof.rewards[index[0]][index[1]] + discount * self.doolhof.values[index[0]][index[1]]
 

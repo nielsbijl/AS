@@ -9,22 +9,36 @@ class agent:
         self.policy = policy
         self.location = location
 
-    def valueCalculate(self, location: tuple, iteration: int, discount: float = 1):
+    def bellmanEquation(self, location: tuple, action: int, discount: float):
+        pos = self.doolhof.action[action](location)
+        index = self.doolhof.coordsToIndex(pos)
+        if not self.doolhof.canIGoThere(index):
+            index = self.doolhof.coordsToIndex(location)
+        value = self.doolhof.values[index[0]][index[1]]
+        reward = self.doolhof.rewards[index[0]][index[1]]
+        return reward + discount * value
+
+    def valueCalculate(self, location: tuple, iteration: int, discount: float = 1, deterministic: bool = False):
         """Een valuefunction dit is een mapping van states naar values.
          Hiervoor kan je dezelfde datastructuur aanhouden als bij de omgeving (e.g. een lijst)."""
         values = []
-        # actions = policy.selectAction(location)  # polici iteration
         actions = self.doolhof.action.keys()
         for action in actions:
-            pos = self.doolhof.action[action](location)
-            index = self.doolhof.coordsToIndex(pos)
-            if (index[0] < 0 or index[1] < 0) or (
-                    index[0] > (len(self.doolhof.values) - 1) or index[1] > (len(self.doolhof.values) - 1)):
-                index = self.doolhof.coordsToIndex(location)
-            value = self.doolhof.values[index[0]][index[1]]
-            reward = self.doolhof.rewards[index[0]][index[1]]
-            # values.append(reward + (discount ** iteration) * value)
-            values.append(reward + discount * value)
+            value = self.bellmanEquation(location, action, discount)
+            # if not deterministic:
+            #     sum = 0
+            #     for secondAction in actions:
+            #         pos = self.doolhof.action[secondAction](location)
+            #         index = self.doolhof.coordsToIndex(pos)
+            #         if not self.doolhof.canIGoThere(index):
+            #             index = self.doolhof.coordsToIndex(location)
+            #         value = self.doolhof.values[index[0]][index[1]]
+            #         reward = self.doolhof.rewards[index[0]][index[1]]
+            #         sum += self.doolhof.actionChance[secondAction] * (reward + discount * value)
+            #     values.append(sum)
+            # else:
+            #     values.append(reward + discount * value)
+            values.append(value)
 
         return max(values)
 
