@@ -1,5 +1,9 @@
 # Inleveropgave 1: Model-based Prediction and Control
 
+![myimage-alt-tag](https://i.ibb.co/Fx6CnBh/matrix.png)
+De positie werkt zoals gebruikelijk bij een grid. Links onder is (0, 0)
+en rechts boven is (3, 3).
+
 ### 3.2 Value Iteration
 `discount = 1`
 
