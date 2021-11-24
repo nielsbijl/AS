@@ -1,21 +1,22 @@
 from ModelbasedPredictionAndControl.doolhof.policy import policy
 from ModelbasedPredictionAndControl.doolhof.doolhof import doolhof
+from ModelbasedPredictionAndControl.doolhof.state import state
 import copy
 
 
 class agent:
-    def __init__(self, doolhof: doolhof, policy: policy, location: tuple):
+    def __init__(self, doolhof: doolhof, policy: policy, startState: state):
         self.doolhof = doolhof
         self.policy = policy
-        self.location = location
+        self.state = startState
 
     def bellmanEquation(self, location: tuple, action: int, discount: float):
         pos = self.doolhof.action[action](location)
         index = self.doolhof.coordsToIndex(pos)
         if not self.doolhof.canIGoThere(index):
             index = self.doolhof.coordsToIndex(location)
-        value = self.doolhof.values[index[0]][index[1]]
-        reward = self.doolhof.rewards[index[0]][index[1]]
+        value = self.doolhof.map[index[0]][index[1]].value
+        reward = self.doolhof.map[index[0]][index[1]].reward
         return reward + discount * value
 
     def valueCalculate(self, location: tuple, discount: float = 1, deterministic: bool = True):
@@ -37,29 +38,29 @@ class agent:
 
     def choseAction(self, discount):
         """Een functie die een actie kiest op basis van een policy en een state"""
-        actions = self.policy.selectAction(pos=self.doolhof.state.position, discount=discount)
+        actions = self.policy.selectAction(pos=self.state.position, discount=discount)
         return actions[0]
 
     def valueIteration(self, discount: float, threshhold=0.01, deterministic: bool = True):
         """Een implementatie van value iteration"""
-        newValues = copy.deepcopy(self.doolhof.values)
+        newValues = copy.deepcopy(self.doolhof.map)
         done = False
         iteration = 0
         while not done:
             delta = 0
-            height = len(self.doolhof.values)
-            width = len(self.doolhof.values[0])
+            height = len(self.doolhof.map)
+            width = len(self.doolhof.map[0])
             for y in range(height):
                 for x in range(width):
                     index = self.doolhof.coordsToIndex((x, y))
                     value = self.valueCalculate(location=(x, y), discount=discount, deterministic=deterministic)
-                    if self.doolhof.end[index[0]][index[1]]:
+                    if self.doolhof.map[index[0]][index[1]].done:
                         value = 0
-                    newValues[index[0]][index[1]] = value
-                    oldValue = self.doolhof.values[index[0]][index[1]]
+                    newValues[index[0]][index[1]].value = value
+                    oldValue = self.doolhof.map[index[0]][index[1]].value
                     # delta = max(abs(value) - abs(oldValue), delta)
                     delta = max(delta, abs(oldValue - value))
-            self.doolhof.values = copy.deepcopy(newValues)
+            self.doolhof.map = copy.deepcopy(newValues)
             if delta < threshhold:
                 done = True
             iteration += 1
