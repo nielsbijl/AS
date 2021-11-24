@@ -1,5 +1,4 @@
 from ModelbasedPredictionAndControl.doolhof.state import state
-import random
 
 
 class doolhof:
@@ -43,13 +42,13 @@ class doolhof:
         return state
 
     def run(self, agent, deterministic: bool = True):
-        print(self.state.position)
+        path = [self.state.position]
         while not self.state.done:
             agent.valueIteration(discount=0.9, threshhold=0.01, deterministic=deterministic)
-            actions = agent.policy.selectAction(pos=self.state.position, discount=0.9)
-            action = actions[0]
+            action = agent.choseAction(discount=0.9)
             self.step(state=self.state, action=action)
-            print(self.state.position)
+            path.append(self.state.position)
+        return path
 
     def coordsToIndex(self, pos: tuple):
         return len(self.rewards) - pos[1] - 1, pos[0]

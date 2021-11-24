@@ -14,7 +14,9 @@ if __name__ == '__main__':
 
     agent = agent(doolhof, policy, startPos)
 
-    # print(agent.valueFunction(startPos, policy, discount=1))
-    # print(agent.valueIteration(discount=0.9, threshhold=0.1))
-    doolhof.run(agent, deterministic=True)
+    # print(agent.valueCalculate(location=(2, 0), discount=1))
+    print(agent.valueIteration(discount=1, threshhold=0.1))
+    # print(doolhof.run(agent, deterministic=True))
     # print(doolhof.values)
+
+

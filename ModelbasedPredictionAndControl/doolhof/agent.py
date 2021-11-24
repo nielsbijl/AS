@@ -18,7 +18,7 @@ class agent:
         reward = self.doolhof.rewards[index[0]][index[1]]
         return reward + discount * value
 
-    def valueCalculate(self, location: tuple, iteration: int, discount: float = 1, deterministic: bool = True):
+    def valueCalculate(self, location: tuple, discount: float = 1, deterministic: bool = True):
         """Een valuefunction dit is een mapping van states naar values.
          Hiervoor kan je dezelfde datastructuur aanhouden als bij de omgeving (e.g. een lijst)."""
         values = []
@@ -33,12 +33,12 @@ class agent:
             else:
                 value = self.bellmanEquation(location, action, discount)
                 values.append(value)
-
         return max(values)
 
-    def choseAction(self, state, policy):
+    def choseAction(self, discount):
         """Een functie die een actie kiest op basis van een policy en een state"""
-        pass
+        actions = self.policy.selectAction(pos=self.doolhof.state.position, discount=discount)
+        return actions[0]
 
     def valueIteration(self, discount: float, threshhold=0.01, deterministic: bool = True):
         """Een implementatie van value iteration"""
@@ -52,8 +52,7 @@ class agent:
             for y in range(height):
                 for x in range(width):
                     index = self.doolhof.coordsToIndex((x, y))
-                    value = self.valueCalculate(location=(x, y), discount=discount,
-                                                iteration=iteration, deterministic=deterministic)
+                    value = self.valueCalculate(location=(x, y), discount=discount, deterministic=deterministic)
                     if self.doolhof.end[index[0]][index[1]]:
                         value = 0
                     newValues[index[0]][index[1]] = value

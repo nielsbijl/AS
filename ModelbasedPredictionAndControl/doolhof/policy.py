@@ -10,13 +10,11 @@ class policy:
         """select_action die op basis van diens value function en een state een actie terug geeft.
          Voor een mvp kan je beginnen met een random policy. """
         options = {}
-        # pos = state.position
         for i in self.doolhof.action.keys():
             index = self.doolhof.coordsToIndex(self.doolhof.action[i](pos))
             if not self.doolhof.canIGoThere(index):
                 index = self.doolhof.coordsToIndex(pos)
             options[i] = self.doolhof.rewards[index[0]][index[1]] + discount * self.doolhof.values[index[0]][index[1]]
-
         bestOption = max(options.values())
         finalOptions = []
         for option in options:
