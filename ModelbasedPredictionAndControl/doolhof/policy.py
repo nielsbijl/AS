@@ -9,8 +9,8 @@ class policy:
         self.doolhof = doolhof
 
     def selectAction(self, pos: tuple, discount: float) -> list:
-        """select_action die op basis van diens value function en een state een actie terug geeft.
-         Voor een mvp kan je beginnen met een random policy. """
+        """This function calculate the best action to execute in its current position on the basis of the
+        valuefunction, it's possible to return multiply best actions"""
         options = {}
         for i in self.doolhof.action.keys():
             index = self.doolhof.coordsToIndex(self.doolhof.action[i](pos))
@@ -25,8 +25,7 @@ class policy:
         return finalOptions
 
     def selectAllActions(self, discount: float):
-        """calculate best actions for all the states (policy)"""
-
+        """This function calculates best actions for all the states (policy)"""
         policyMatrix = [[0, 0, 0, 0],
                         [0, 0, 0, 0],
                         [0, 0, 0, 0],

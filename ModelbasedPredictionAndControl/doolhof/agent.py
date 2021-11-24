@@ -11,17 +11,17 @@ class agent:
         self.state = startState
 
     def bellmanEquation(self, location: tuple, action: int, discount: float):
-        pos = self.doolhof.action[action](location)
-        index = self.doolhof.coordsToIndex(pos)
-        if not self.doolhof.canIGoThere(index):
+        """Calculates the bellman equation (reward + discount * value)"""
+        pos = self.doolhof.action[action](location)  # if I execute the action what will the position be
+        index = self.doolhof.coordsToIndex(pos)  # position to index
+        if not self.doolhof.canIGoThere(index):  # check if the new position is out of the map
             index = self.doolhof.coordsToIndex(location)
         value = self.doolhof.map[index[0]][index[1]].value
         reward = self.doolhof.map[index[0]][index[1]].reward
         return reward + discount * value
 
     def valueCalculate(self, location: tuple, discount: float = 1, deterministic: bool = True):
-        """Een valuefunction dit is een mapping van states naar values.
-         Hiervoor kan je dezelfde datastructuur aanhouden als bij de omgeving (e.g. een lijst)."""
+        """Calculates the value for the valuefunction of one location in the map"""
         values = []
         actions = self.doolhof.action.keys()
         for action in actions:
@@ -37,12 +37,12 @@ class agent:
         return max(values)
 
     def choseAction(self, discount):
-        """Een functie die een actie kiest op basis van een policy en een state"""
+        """This function choses an action with the policy"""
         actions = self.policy.selectAction(pos=self.state.position, discount=discount)
         return actions[0]
 
     def valueIteration(self, discount: float, threshhold=0.01, deterministic: bool = True):
-        """Een implementatie van value iteration"""
+        """Makes the valuefunction. Loops thru the whole map and calculates the values"""
         newValues = copy.deepcopy(self.doolhof.map)
         done = False
         iteration = 0
@@ -50,15 +50,15 @@ class agent:
             delta = 0
             height = len(self.doolhof.map)
             width = len(self.doolhof.map[0])
-            for y in range(height):
+            for y in range(height):  # Loop thru the whole map
                 for x in range(width):
                     index = self.doolhof.coordsToIndex((x, y))
                     value = self.valueCalculate(location=(x, y), discount=discount, deterministic=deterministic)
                     if self.doolhof.map[index[0]][index[1]].done:
                         value = 0
-                    newValues[index[0]][index[1]].value = value
+                    newValues[index[0]][index[1]].value = value  # set new value
+                    #  Calculate the current delta
                     oldValue = self.doolhof.map[index[0]][index[1]].value
-                    # delta = max(abs(value) - abs(oldValue), delta)
                     delta = max(delta, abs(oldValue - value))
             self.doolhof.map = copy.deepcopy(newValues)
             if delta < threshhold:
@@ -67,4 +67,4 @@ class agent:
         return newValues
 
     def __str__(self):
-        return "policy: %s" % self.policy
+        return "state: %s" % self.state
