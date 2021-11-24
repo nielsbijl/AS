@@ -1,6 +1,6 @@
 # Inleveropgave 1: Model-based Prediction and Control
 
-### Value Iteration
+### 3.2 Value Iteration
 `discount = 1`
 
 `Route: [(2, 0), (2, 1), (1, 1), (1, 2), (1, 3), (2, 3), (3, 3)]`
@@ -18,7 +18,7 @@
 [[None], [↑], [↑], [↑, ←]]<br>
 
 
-### Optioneel: Value Iteration in non-deterministic environments:
+### 3.3 Optioneel: Value Iteration in non-deterministic environments:
 Ik heb dit geïmplementeerd. Wanneer je de doolhof.run functie aanroept moet je meegeven of de uitvoering deterministisch is of niet.<br>
 
 `discount = 1`
