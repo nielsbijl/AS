@@ -32,11 +32,11 @@ class doolhof:
             state.done = False
         return state
 
-    def run(self, agent, deterministic: bool = True):
+    def run(self, agent, deterministic: bool = True, discount: float = 0.9):
         path = [agent.state.position]
         while not agent.state.done:
-            agent.valueIteration(discount=0.9, threshhold=0.01, deterministic=deterministic)
-            action = agent.choseAction(discount=0.9)
+            agent.valueIteration(discount=discount, threshhold=0.01, deterministic=deterministic)
+            action = agent.choseAction(discount=discount)
             agent.state = self.step(state=agent.state, action=action)
             path.append(agent.state.position)
         return path

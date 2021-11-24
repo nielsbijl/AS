@@ -1,3 +1,5 @@
+import copy
+
 from ModelbasedPredictionAndControl.doolhof.state import state
 from ModelbasedPredictionAndControl.doolhof.doolhof import doolhof
 
@@ -21,6 +23,24 @@ class policy:
             if options[option] == bestOption:
                 finalOptions.append(option)
         return finalOptions
+
+    def selectAllActions(self, discount: float):
+        """calculate best actions for all the states (policy)"""
+
+        policyMatrix = [[0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0]]
+
+        for y in range(len(self.doolhof.map)):
+            for x in range(len(self.doolhof.map[0])):
+                pol = self.selectAction((x, y), discount)
+                index = self.doolhof.coordsToIndex((x, y))
+                if self.doolhof.map[index[0]][index[1]].done:
+                    policyMatrix[index[0]][index[1]] = [None]
+                else:
+                    policyMatrix[index[0]][index[1]] = pol
+        return policyMatrix
 
     def __str__(self):
         return "doolhof: %s" % self.doolhof
