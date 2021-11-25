@@ -1,6 +1,6 @@
-from ModelbasedPredictionAndControl.doolhof.doolhof import doolhof
-from ModelbasedPredictionAndControl.doolhof.agent import agent
-from ModelbasedPredictionAndControl.doolhof.policy import policy
+from ModelbasedPredictionAndControl.doolhof.doolhof import Doolhof
+from ModelbasedPredictionAndControl.doolhof.agent import Agent
+from ModelbasedPredictionAndControl.doolhof.policy import Policy
 
 
 def printPolicy(policyMatrix: list):
@@ -18,13 +18,13 @@ def printPolicy(policyMatrix: list):
 if __name__ == '__main__':
     startPos = (2, 0)
 
-    doolhof = doolhof()
-    policy = policy(doolhof)
+    doolhof = Doolhof()
+    policy = Policy(doolhof)
 
     startStateIndex = doolhof.coordsToIndex(startPos)
     startState = doolhof.map[startStateIndex[0]][startStateIndex[1]]
 
-    agent = agent(doolhof, policy, startState)
+    agent = Agent(doolhof, policy, startState)
 
     print("Route:", doolhof.run(agent, deterministic=True, discount=1))
     result = doolhof.map

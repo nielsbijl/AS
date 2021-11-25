@@ -1,11 +1,11 @@
 import copy
 
-from ModelbasedPredictionAndControl.doolhof.state import state
-from ModelbasedPredictionAndControl.doolhof.doolhof import doolhof
+from ModelbasedPredictionAndControl.doolhof.state import State
+from ModelbasedPredictionAndControl.doolhof.doolhof import Doolhof
 
 
-class policy:
-    def __init__(self, doolhof: doolhof):
+class Policy:
+    def __init__(self, doolhof: Doolhof):
         self.doolhof = doolhof
 
     def selectAction(self, pos: tuple, discount: float) -> list:

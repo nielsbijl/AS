@@ -1,11 +1,11 @@
-from ModelbasedPredictionAndControl.doolhof.policy import policy
-from ModelbasedPredictionAndControl.doolhof.doolhof import doolhof
-from ModelbasedPredictionAndControl.doolhof.state import state
+from ModelbasedPredictionAndControl.doolhof.policy import Policy
+from ModelbasedPredictionAndControl.doolhof.doolhof import Doolhof
+from ModelbasedPredictionAndControl.doolhof.state import State
 import copy
 
 
-class agent:
-    def __init__(self, doolhof: doolhof, policy: policy, startState: state):
+class Agent:
+    def __init__(self, doolhof: Doolhof, policy: Policy, startState: State):
         self.doolhof = doolhof
         self.policy = policy
         self.state = startState

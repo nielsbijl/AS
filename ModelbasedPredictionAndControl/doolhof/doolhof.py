@@ -1,7 +1,7 @@
-from ModelbasedPredictionAndControl.doolhof.state import state
+from ModelbasedPredictionAndControl.doolhof.state import State
 
 
-class doolhof:
+class Doolhof:
     def __init__(self):
         self.action = {0: (lambda q: (q[0], q[1] + 1)),  # Go up
                        1: (lambda q: (q[0] + 1, q[1])),  # Go right
@@ -12,12 +12,12 @@ class doolhof:
                                         2: 0.1,
                                         3: 0.1}
         # The map is a 2-d list of states
-        self.map = [[state((0, 3), -1, False), state((1, 3), -1, False), state((2, 3), -1, False), state((3, 3), 40, True)],
-                    [state((0, 2), -1, False), state((1, 2), -1, False), state((2, 2), -10, False), state((3, 2), -10, False)],
-                    [state((0, 1), -1, False), state((1, 1), -1, False), state((2, 1), -1, False), state((3, 1), -1, False)],
-                    [state((0, 0), 10, True), state((1, 0), -2, False), state((2, 0), -1, False), state((3, 0), -1, False)]]
+        self.map = [[State((0, 3), -1, False), State((1, 3), -1, False), State((2, 3), -1, False), State((3, 3), 40, True)],
+                    [State((0, 2), -1, False), State((1, 2), -1, False), State((2, 2), -10, False), State((3, 2), -10, False)],
+                    [State((0, 1), -1, False), State((1, 1), -1, False), State((2, 1), -1, False), State((3, 1), -1, False)],
+                    [State((0, 0), 10, True), State((1, 0), -2, False), State((2, 0), -1, False), State((3, 0), -1, False)]]
 
-    def step(self, currentState: state, action: int) -> state:
+    def step(self, currentState: State, action: int) -> State:
         """This function executes one step of the simulation"""
         newPos = self.action[action](currentState.position)
         indexNewPos = self.coordsToIndex(newPos)

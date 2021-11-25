@@ -1,20 +1,20 @@
 import unittest
-from ModelbasedPredictionAndControl.doolhof.doolhof import doolhof
-from ModelbasedPredictionAndControl.doolhof.agent import agent
-from ModelbasedPredictionAndControl.doolhof.policy import policy
+from ModelbasedPredictionAndControl.doolhof.doolhof import Doolhof
+from ModelbasedPredictionAndControl.doolhof.agent import Agent
+from ModelbasedPredictionAndControl.doolhof.policy import Policy
 
 
 class agentTest(unittest.TestCase):
     def setUp(self):
         self.startPos = (2, 0)
 
-        self.maze = doolhof()
-        self.pol = policy(self.maze)
+        self.maze = Doolhof()
+        self.pol = Policy(self.maze)
 
         startStateIndex = self.maze.coordsToIndex(self.startPos)
         startState = self.maze.map[startStateIndex[0]][startStateIndex[1]]
 
-        self.player = agent(self.maze, self.pol, startState)
+        self.player = Agent(self.maze, self.pol, startState)
 
     def testValueIteration(self):
         expected = [[38, 39, 40, 0],

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class state:
+class State:
     def __init__(self, pos: tuple, reward: int, done: bool, value: float = 0):
         self.position = pos
         self.reward = reward
