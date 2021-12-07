@@ -2,6 +2,16 @@ import copy
 
 from Inleveropgave2.doolhof.state import State
 from Inleveropgave2.doolhof.doolhof import Doolhof
+import random
+
+
+def getMaxFromList(actions: list):
+    maxValue = max(actions)
+    maxValues = []
+    for i in range(len(actions)):
+        if actions[i] == maxValue:
+            maxValues.append(i)
+    return random.choice(maxValues)
 
 
 class Policy:
@@ -11,6 +21,21 @@ class Policy:
                        [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
                        [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
                        [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]]]
+        self.matrix3D = [
+            [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]],
+            [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]],
+            [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]],
+            [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]]]
+
+    def updatePolicyMatrix(self, q: list, index: tuple, epsilon):
+        actions = sorted(list(self.doolhof.action.keys()))
+        aStar = getMaxFromList(q[index[0]][index[1]])
+        for a in actions:
+            if a == aStar:
+                policyA = 1 - epsilon + epsilon / len(q[index[0]][index[1]])
+            else:
+                policyA = epsilon / len(q[index[0]][index[1]])
+            self.matrix3D[index[0]][index[1]][a] = policyA
 
     def selectAction(self, pos: tuple, discount: float) -> list:
         """This function calculate the best action to execute in its current position on the basis of the
@@ -29,7 +54,7 @@ class Policy:
                 finalOptions.append(option)
         return finalOptions
 
-    def selectAllActions(self, discount: float):
+    def createPolicyMatrix(self, discount: float):
         """This function calculates best actions for all the states (policy)"""
         for y in range(len(self.doolhof.map)):
             for x in range(len(self.doolhof.map[0])):

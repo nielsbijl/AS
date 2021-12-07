@@ -1,8 +1,9 @@
-from Inleveropgave2.doolhof.policy import Policy
+from Inleveropgave2.doolhof.policy import Policy, getMaxFromList
 from Inleveropgave2.doolhof.doolhof import Doolhof
 from Inleveropgave2.doolhof.state import State
 import copy
 import random
+
 
 
 class Agent:
@@ -67,7 +68,7 @@ class Agent:
             iteration += 1
         return newValues
 
-    def createRandomRoute(self):
+    def createRouteByPolicy(self):
         pos = (random.randint(0, 3), random.randint(0, 3))  # start position
         route = [pos]
         index = self.doolhof.coordsToIndex(pos)
@@ -86,65 +87,160 @@ class Agent:
         return route
 
     def monteCarloPolicyEvaluation(self, episodes: int = 1000, discount: float = 0.9):
+        returns = {}
+        for y in range(len(self.doolhof.map)):
+            for x in range(len(self.doolhof.map[0])):
+                returns[(x, y)] = []
         for episode in range(episodes):
-            route = self.createRandomRoute()
-            returns = [0]
-            index = self.doolhof.coordsToIndex(route[0])
-            self.state = self.doolhof.map[index[0]][index[1]]
-            for i in range(len(route) - 1):
-                if self.state.done:
-                    break
-                i += 1
-                index = self.doolhof.coordsToIndex(route[i])
-                self.state = self.doolhof.map[index[0]][index[1]]
-                return_ = discount * returns[-1] + self.state.reward
-                returns.append(return_)
-            route = route[:len(returns)]
-            routesDone = []
-            for i in range(len(route)):
-                i = (i + 1) * - 1
-                pos = route[i]
-                if not pos in routesDone:
-                    routesDone.append(pos)
-                    index = self.doolhof.coordsToIndex(pos)
+            route = self.createRouteByPolicy()
+            g = 0
+            for i in range(len(route) - 2, -1, -1):
+                if not route[i] in route[:i]:
+                    index = self.doolhof.coordsToIndex(route[i])
                     state = self.doolhof.map[index[0]][index[1]]
+                    nextIndex = self.doolhof.coordsToIndex(route[i + 1])
+                    nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                    g = discount * g + nextState.reward
+                    returns[route[i]].append(g)
                     if state.done:
                         state.value = 0
                     else:
-                        state.value = (state.value + returns[i]) / 2
-        print(self.doolhof.getValues())
+                        state.value = sum(returns[route[i]]) / len(returns[route[i]])
+        return self.doolhof.getValues()
 
-    def temporalDifferenceLearning(self, episodes: int = 1, discount: float = 0.9):
+    def tabular(self, episodes: int = 1, discount: float = 1, alpha: float = 0.1):
         for episode in range(episodes):
             pos = (random.randint(0, 3), random.randint(0, 3))
-            route = [pos]
-            returns = [0]
             index = self.doolhof.coordsToIndex(pos)
-            self.state = self.doolhof.map[index[0]][index[1]]
-            while self.state.done == False:
-                if self.state.done:
-                    break
-                actions = self.policy.matrix[index[0]][index[1]]
-                action = random.choice(actions)
-                newPos = self.doolhof.action[action](pos)
-                if not self.doolhof.canIGoThere(newPos):
-                    newPos = copy.deepcopy(pos)
-                pos = copy.deepcopy(newPos)
-                route.append(newPos)
-                index = self.doolhof.coordsToIndex(newPos)
-                self.state = self.doolhof.map[index[0]][index[1]]
-                return_ = discount * returns[-1] + self.state.reward
-                returns.append(return_)
-            routesDone = []
-            for i in range(len(route)):
-                i = (i + 1) * - 1
-                pos = route[i]
-                if not pos in routesDone:
-                    routesDone.append(pos)
-                    index = self.doolhof.coordsToIndex(pos)
-                    state = self.doolhof.map[index[0]][index[1]]
-                    state.value = (state.value + returns[i]) / 2
+            state = self.doolhof.map[index[0]][index[1]]
+            while not state.done:
+                action = random.choice(self.policy.matrix[index[0]][index[1]])
+                nextPos = self.doolhof.action[action](pos)
+                nextIndex = self.doolhof.coordsToIndex(nextPos)
+                if not self.doolhof.canIGoThere(nextIndex):
+                    nextPos = copy.deepcopy(pos)
+                nextIndex = self.doolhof.coordsToIndex(nextPos)
+                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                state.value = state.value + alpha * (nextState.reward + discount * nextState.value - state.value)
+                state = nextState
+                pos = copy.deepcopy(nextPos)
+                index = copy.deepcopy(nextIndex)
         return self.doolhof.getValues()
+
+
+
+
+    def createRouteWithActionByPolicy(self):
+        pos = (random.randrange(4), random.randrange(4))  # start position
+        route = [(pos, 0)]
+        index = self.doolhof.coordsToIndex(pos)
+        while not self.doolhof.map[index[0]][index[1]].done:
+            currPolicy = self.policy.matrix3D[index[0]][index[1]]
+            # chosenAction = getMaxAction(currPolicy)
+            chosenAction = random.choices(list(self.doolhof.action.keys()), currPolicy)[0]
+            action = self.doolhof.action[chosenAction]
+            newPos = action(pos)
+            index = self.doolhof.coordsToIndex(newPos)
+            if not self.doolhof.canIGoThere(index):
+                newPos = copy.deepcopy(pos)
+                index = self.doolhof.coordsToIndex(newPos)
+            route.append((newPos, chosenAction))
+            pos = copy.deepcopy(newPos)
+        return route
+
+    def onPolicyFirstVisitMonteCarloControl(self, episodes: int = 1, discount: float = 0.9, epsilon=0.1):
+        actions = sorted(list(self.doolhof.action.keys()))
+        q = [[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]]
+        returns = {}
+        for y in range(len(self.doolhof.map)):
+            for x in range(len(self.doolhof.map[0])):
+                for action in actions:
+                    returns[(x, y), action] = []
+        for episode in range(episodes):
+            # print("episode", episode)
+            # print(self.policy.matrix3D)
+            route = self.createRouteWithActionByPolicy()
+            len_ = len(route)
+            g = 0
+            for i in range(len(route) - 2, -1, -1):
+                index = self.doolhof.coordsToIndex(route[i][0])
+                state = self.doolhof.map[index[0]][index[1]]
+                nextIndex = self.doolhof.coordsToIndex(route[i + 1][0])
+                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                g = discount * g + nextState.reward
+
+                if not route[i] in route[:i]:
+                    returns[(route[i])].append(g)
+
+                    q[index[0]][index[1]][route[i][1]] = sum(returns[route[i]]) / len(returns[route[i]])
+
+                    aStar = getMaxFromList(q[index[0]][index[1]])
+
+                    for a in actions:
+                        if a == aStar:
+                            policyA = 1 - epsilon + epsilon / len(q[index[0]][index[1]])
+                        else:
+                            policyA = epsilon / len(q[index[0]][index[1]])
+                        self.policy.matrix3D[index[0]][index[1]][a] = policyA
+
+        return q
+
+    def sarsa(self, episodes: int = 1, discount: float = 0.9, epsilon: float = 0.1, alpha = 0.1):
+        q = [[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]]
+        for episode in range(episodes):
+            pos = (random.randrange(4), random.randrange(4))
+            index = self.doolhof.coordsToIndex(pos)
+            state = self.doolhof.map[index[0]][index[1]]
+            action = random.choices(sorted(list(self.doolhof.action.keys())), q[index[0]][index[1]])[0]
+            while not state.done:
+                nextPos = self.doolhof.action[action](pos)
+                nextIndex = self.doolhof.coordsToIndex(nextPos)
+                if not self.doolhof.canIGoThere(nextIndex):
+                    nextPos = copy.deepcopy(pos)
+                    nextIndex = self.doolhof.coordsToIndex(nextPos)
+                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                reward = nextState.reward
+                # print(self.policy.matrix3D[nextIndex[0]][nextIndex[1]])
+                nextAction = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix3D[nextIndex[0]][nextIndex[1]])[0]
+                # print("nextAction", nextAction)
+
+                currQ = q[index[0]][index[1]][action]
+                nextQ = q[nextIndex[0]][nextIndex[1]][nextAction]
+                q[index[0]][index[1]][action] = currQ + alpha * (reward + discount * nextQ - currQ)
+                self.policy.updatePolicyMatrix(q=q, index=index, epsilon=epsilon)
+
+                pos = copy.deepcopy(nextPos)
+                index = copy.deepcopy(nextIndex)
+                state = copy.deepcopy(nextState)
+                action = copy.deepcopy(nextAction)
+            print(episode)
+        return q
+
+    def qLearning(self, episodes: int = 1, discount: float = 0.9, epsilon: float = 0.1):
+        q = [[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]]
+        for episode in range(episodes):
+            pos = (random.randint(0, 3), random.randint(0, 3))
+            index = self.doolhof.coordsToIndex(pos)
+            state = self.doolhof.map[index[0]][index[1]]
+            action = q[index[0]][index[1]].index(max(q[index[0]][index[1]]))
+            while not state.done:
+                nextPos = self.doolhof.action[action](pos)
+                if not self.doolhof.canIGoThere(nextPos):
+                    nextPos = pos
+                nextIndex = self.doolhof.coordsToIndex(nextPos)
+                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                reward = nextState.reward
+                # q[index[0]][index[1]][action] = q[index[0]][index[1]][action] + epsilon * (reward + discount * # ?????)
+
 
     def __str__(self):
         return "state: %s" % self.state

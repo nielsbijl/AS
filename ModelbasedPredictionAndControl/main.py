@@ -33,4 +33,4 @@ if __name__ == '__main__':
     [print(valueRow) for valueRow in values]
 
     print("\n Policy:")
-    printPolicy(agent.policy.selectAllActions(discount=1))
+    printPolicy(agent.policy.createPolicyMatrix(discount=1))
