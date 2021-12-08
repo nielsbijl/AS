@@ -1,7 +1,7 @@
 import copy
 
 from Inleveropgave2.doolhof.state import State
-from Inleveropgave2.doolhof.doolhof import Doolhof
+from Inleveropgave2.doolhof.maze import Maze
 import random
 
 
@@ -15,7 +15,7 @@ def getMaxFromList(actions: list):
 
 
 class Policy:
-    def __init__(self, doolhof: Doolhof):
+    def __init__(self, doolhof: Maze):
         self.doolhof = doolhof
         self.matrix = [
             [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]],

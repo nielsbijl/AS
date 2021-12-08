@@ -1,7 +1,7 @@
 from Inleveropgave2.doolhof.state import State
 
 
-class Doolhof:
+class Maze:
     def __init__(self):
         self.action = {0: (lambda q: (q[0], q[1] + 1)),  # Go up
                        1: (lambda q: (q[0] + 1, q[1])),  # Go right

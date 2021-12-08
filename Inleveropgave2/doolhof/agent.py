@@ -1,12 +1,12 @@
 from Inleveropgave2.doolhof.policy import Policy, getMaxFromList
-from Inleveropgave2.doolhof.doolhof import Doolhof
+from Inleveropgave2.doolhof.maze import Maze
 from Inleveropgave2.doolhof.state import State
 import copy
 import random
 
 
 class Agent:
-    def __init__(self, doolhof: Doolhof, policy: Policy, startState: State):
+    def __init__(self, doolhof: Maze, policy: Policy, startState: State):
         self.doolhof = doolhof
         self.policy = policy
         self.state = startState
@@ -184,7 +184,6 @@ class Agent:
                     q[index[0]][index[1]][action] = sum(returns[(pos, action)]) / len(returns[(pos, action)])
                     # Update policy with Q
                     self.policy.updatePolicyMatrix(q=q, index=index, epsilon=epsilon)
-            print(episode)
         return q
 
     def sarsa(self, episodes: int = 1, discount: float = 0.9, epsilon: float = 0.1, alpha=0.1):
@@ -233,7 +232,6 @@ class Agent:
                 state = copy.deepcopy(nextState)
                 # A <- A'
                 action = copy.deepcopy(nextAction)
-            print(episode)
         return q
 
     def qLearning(self, episodes: int = 1, discount: float = 0.9, epsilon: float = 0.1, alpha=0.1):
@@ -273,7 +271,6 @@ class Agent:
                 state = copy.deepcopy(nextState)
                 index = copy.deepcopy(nextIndex)
                 pos = copy.deepcopy(nextPos)
-            print(episode)
         return q
 
     def sumQs(self, q1, q2):
@@ -341,7 +338,6 @@ class Agent:
                 state = copy.deepcopy(nextState)
                 index = copy.deepcopy(nextIndex)
                 pos = copy.deepcopy(nextPos)
-            print(episode)
         return q1, q2
 
     def __str__(self):

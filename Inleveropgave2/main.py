@@ -1,4 +1,4 @@
-from Inleveropgave2.doolhof.doolhof import Doolhof
+from Inleveropgave2.doolhof.maze import Maze
 from Inleveropgave2.doolhof.agent import Agent
 from Inleveropgave2.doolhof.policy import Policy
 from matplotlib import pyplot as plt
@@ -74,7 +74,7 @@ def printTriangleMatrix(values):
 if __name__ == '__main__':
     startPos = (2, 0)
 
-    doolhof = Doolhof()
+    doolhof = Maze()
     policy = Policy(doolhof)
 
     startStateIndex = doolhof.coordsToIndex(startPos)
@@ -88,9 +88,12 @@ if __name__ == '__main__':
     #     [[1, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 0, 1]],
     #     [[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 1]]]
 
-    # values = agent.monteCarloPolicyEvaluation(10000, discount=1)
+    # values = agent.tabular(10000, discount=1)
     # print(values)
 
-    values = agent.doubleqLearning(episodes=10000, discount=1)
+    values = agent.onPolicyFirstVisitMonteCarloControl(episodes=100000, discount=1)
+    # values = agent.policy.matrix
     matrix = reformatMatrix(values)
     printTriangleMatrix(matrix)
+    print(values)
+
