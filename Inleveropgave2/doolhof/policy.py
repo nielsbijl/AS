@@ -17,25 +17,27 @@ def getMaxFromList(actions: list):
 class Policy:
     def __init__(self, doolhof: Doolhof):
         self.doolhof = doolhof
-        self.matrix = [[[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
-                       [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
-                       [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
-                       [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]]]
-        self.matrix3D = [
+        self.matrix = [
             [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]],
             [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]],
             [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]],
             [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]]]
 
     def updatePolicyMatrix(self, q: list, index: tuple, epsilon):
+        # Get all the possible actions: [0, 1, 2, 3]
         actions = sorted(list(self.doolhof.action.keys()))
+        # A* <- argmax Q(St, a)
         aStar = getMaxFromList(q[index[0]][index[1]])
+        # For all a ∈ A(St)
         for a in actions:
-            if a == aStar:
+            if a == aStar:  # if a = A*
+                # policyA = 1 - epsilon + epsilon /|A(St)|
                 policyA = 1 - epsilon + epsilon / len(q[index[0]][index[1]])
-            else:
+            else:  # if a != A*
+                # policyA = epsilon /|A(St)|
                 policyA = epsilon / len(q[index[0]][index[1]])
-            self.matrix3D[index[0]][index[1]][a] = policyA
+            # π(a|St) <- policyA
+            self.matrix[index[0]][index[1]][a] = policyA
 
     def selectAction(self, pos: tuple, discount: float) -> list:
         """This function calculate the best action to execute in its current position on the basis of the

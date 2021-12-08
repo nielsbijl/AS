@@ -82,13 +82,15 @@ if __name__ == '__main__':
 
     agent = Agent(doolhof, policy, startState)
 
-    # agent.policy.matrix = [[[1], [1], [1], [None]], [[0, 1], [0], [0], [0]], [[0, 1], [0], [3], [3]],
-    #                        [[None], [0], [0], [0, 3]]]
-    # print(agent.policy.matrix)
-    values = agent.onPolicyFirstVisitMonteCarloControl(episodes=100000, discount=1)
-    print(values)
-    # values = agent.policy.matrix3D
-    # # print(agent.policy.matrix)
-    #
+    # agent.policy.matrix = [
+    #     [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]],
+    #     [[1, 1, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]],
+    #     [[1, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 0, 1]],
+    #     [[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 1]]]
+
+    # values = agent.monteCarloPolicyEvaluation(10000, discount=1)
+    # print(values)
+
+    values = agent.doubleqLearning(episodes=10000, discount=1)
     matrix = reformatMatrix(values)
     printTriangleMatrix(matrix)
