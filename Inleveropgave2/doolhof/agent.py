@@ -99,24 +99,18 @@ class Agent:
         """Makes the valuefunction. Temporal Difference Learning"""
         for episode in range(episodes):
             # Initialize S
-            pos = (random.randint(0, 3), random.randint(0, 3))
-            index = self.doolhof.coordsToIndex(pos)
-            state = self.doolhof.map[index[0]][index[1]]
-            while not state.done:  # Loop for each step of episode until S is terminal
+            self.state = self.doolhof.map[random.randrange(4)][random.randrange(4)]
+            index = self.doolhof.coordsToIndex(self.state.position)
+            while not self.state.done:  # Loop for each step of episode until S is terminal
                 # Action given by policy for S
                 action = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix[index[0]][index[1]])[0]
                 # Take action A, observe R, S'
-                nextPos = self.doolhof.action[action](pos)
-                nextIndex = self.doolhof.coordsToIndex(nextPos)
-                if not self.doolhof.canIGoThere(nextIndex):  # check if next pos is out of the map
-                    nextPos = copy.deepcopy(pos)
-                    nextIndex = self.doolhof.coordsToIndex(nextPos)
-                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                nextState = self.doolhof.step(currentState=self.state, action=action)
+                nextIndex = self.doolhof.coordsToIndex(nextState.position)
                 # V(S) <- V(S) + alpha * [R + discount * V(S') - V(S)]
-                state.value = state.value + alpha * (nextState.reward + discount * nextState.value - state.value)
+                self.state.value = self.state.value + alpha * (nextState.reward + discount * nextState.value - self.state.value)
                 # S <- S'
-                state = copy.deepcopy(nextState)
-                pos = copy.deepcopy(nextPos)
+                self.state = copy.deepcopy(nextState)
                 index = copy.deepcopy(nextIndex)
         return self.doolhof.getValues()  # Return valuefunction
 
@@ -126,18 +120,17 @@ class Agent:
         route = []  # format: [((x, y), action), ((x, y), action) .....]
         # Initialize start state
         self.state = self.doolhof.map[random.randrange(4)][random.randrange(4)]
-        state = self.state
-        pos = state.position
+        pos = self.state.position
         # Initialize start action
-        while not state.done:
+        while not self.state.done:
             # Chose action following policy
             index = self.doolhof.coordsToIndex(pos)
             action = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix[index[0]][index[1]])[
                 0]
             route.append((pos, action))
             # Set next State
-            state = self.doolhof.step(currentState=state, action=action)
-            pos = state.position
+            self.state = self.doolhof.step(currentState=self.state, action=action)
+            pos = self.state.position
         route.append((pos, None))
         return route
 
