@@ -95,5 +95,9 @@ if __name__ == '__main__':
     # values = agent.policy.matrix
     matrix = reformatMatrix(values)
     printTriangleMatrix(matrix)
+
+    values = agent.policy.matrix
+    matrix = reformatMatrix(values)
+    printTriangleMatrix(matrix)
     print(values)
 

@@ -129,7 +129,6 @@ class Agent:
         index = self.doolhof.coordsToIndex(pos)  # Transfer pos to an index
         state = self.doolhof.map[index[0]][index[1]]
         # Initialize start action
-        action = random.randrange(4)
         while not state.done:
             # Chose action following policy
             action = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix[index[0]][index[1]])[
@@ -142,7 +141,7 @@ class Agent:
             pos = copy.deepcopy(newPos)
             index = self.doolhof.coordsToIndex(newPos)  # Transfer new pos to an index
             state = self.doolhof.map[index[0]][index[1]]
-        route.append((pos, action))
+        route.append((pos, None))
         return route
 
     def onPolicyFirstVisitMonteCarloControl(self, episodes: int = 100000, discount: float = 0.9, epsilon=0.1):
@@ -171,12 +170,13 @@ class Agent:
                 # G <- discount * G + R
                 pos = episodeRoute[t - 1][0]
                 index = self.doolhof.coordsToIndex(pos)
-                action = episodeRoute[t][1]
+                action = episodeRoute[t - 1][1]
                 nextPos = episodeRoute[t][0]
                 nextIndex = self.doolhof.coordsToIndex(nextPos)
                 reward = self.doolhof.map[nextIndex[0]][nextIndex[1]].reward
                 g = discount * g + reward
                 # Unless the pair St,At appears in S0,A0,S1,A1 .....
+
                 if not (episodeRoute[t - 1] in episodeRoute[:t - 1]):
                     # Append G to Returns(St,At)
                     returns[(pos, action)].append(g)
