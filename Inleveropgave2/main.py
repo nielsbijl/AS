@@ -39,6 +39,7 @@ def triangulation_for_triheatmap(M, N):
 
 
 def reformatMatrix(values):
+    """Reformat the matrix so the matrix can be ploted with triangles"""
     zuid, oost, noord, west = [], [], [], []
     for i in range(-1, len(values) * -1 - 1, -1):
         zuidRow, oostRow, noordRow, westRow = [], [], [], []
@@ -82,22 +83,10 @@ if __name__ == '__main__':
 
     agent = Agent(doolhof, policy, startState)
 
-    # agent.policy.matrix = [
-    #     [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]],
-    #     [[1, 1, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]],
-    #     [[1, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1], [0, 0, 0, 1]],
-    #     [[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 1]]]
-
-    # values = agent.tabular(10000, discount=1)
-    # print(values)
-
-    values = agent.onPolicyFirstVisitMonteCarloControl(episodes=100000, discount=1)
-    # values = agent.policy.matrix
+    values = agent.doubleqLearning(episodes=100000, discount=1)[0]
     matrix = reformatMatrix(values)
     printTriangleMatrix(matrix)
 
     values = agent.policy.matrix
     matrix = reformatMatrix(values)
     printTriangleMatrix(matrix)
-    print(values)
-

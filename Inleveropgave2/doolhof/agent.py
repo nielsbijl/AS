@@ -125,22 +125,19 @@ class Agent:
         # Initialize empty episode (route)
         route = []  # format: [((x, y), action), ((x, y), action) .....]
         # Initialize start state
-        pos = (random.randrange(4), random.randrange(4))  # start position
-        index = self.doolhof.coordsToIndex(pos)  # Transfer pos to an index
-        state = self.doolhof.map[index[0]][index[1]]
+        self.state = self.doolhof.map[random.randrange(4)][random.randrange(4)]
+        state = self.state
+        pos = state.position
         # Initialize start action
         while not state.done:
             # Chose action following policy
+            index = self.doolhof.coordsToIndex(pos)
             action = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix[index[0]][index[1]])[
                 0]
             route.append((pos, action))
             # Set next State
-            newPos = self.doolhof.action[action](pos)
-            if not self.doolhof.canIGoThere(self.doolhof.coordsToIndex(newPos)):  # Check if pos fits in the map
-                newPos = copy.deepcopy(pos)
-            pos = copy.deepcopy(newPos)
-            index = self.doolhof.coordsToIndex(newPos)  # Transfer new pos to an index
-            state = self.doolhof.map[index[0]][index[1]]
+            state = self.doolhof.step(currentState=state, action=action)
+            pos = state.position
         route.append((pos, None))
         return route
 
@@ -198,21 +195,17 @@ class Agent:
         # Loop for each episode
         for episode in range(episodes):
             # Initialize S
-            pos = (random.randrange(4), random.randrange(4))
+            self.state = self.doolhof.map[random.randrange(4)][random.randrange(4)]
+            pos = self.state.position
             index = self.doolhof.coordsToIndex(pos)
-            state = self.doolhof.map[index[0]][index[1]]
             # Choose A from S using policy derived from Q
             action = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix[index[0]][index[1]])[
                 0]
             # Loop for each step of episode until S is terminal
-            while not state.done:
+            while not self.state.done:
                 # Take action A, observe S'
-                nextPos = self.doolhof.action[action](pos)
-                nextIndex = self.doolhof.coordsToIndex(nextPos)
-                if not self.doolhof.canIGoThere(nextIndex):
-                    nextPos = copy.deepcopy(pos)
-                    nextIndex = self.doolhof.coordsToIndex(nextPos)
-                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                nextState = self.doolhof.step(currentState=self.state, action=action)
+                nextIndex = self.doolhof.coordsToIndex(nextState.position)
                 # Take action A, observe R
                 reward = nextState.reward
                 # Choose A' from S' using policy derived from Q
@@ -227,9 +220,8 @@ class Agent:
                 self.policy.updatePolicyMatrix(q=q, index=index, epsilon=epsilon)
 
                 # S <- S'
-                pos = copy.deepcopy(nextPos)
                 index = copy.deepcopy(nextIndex)
-                state = copy.deepcopy(nextState)
+                self.state = copy.deepcopy(nextState)
                 # A <- A'
                 action = copy.deepcopy(nextAction)
         return q
@@ -245,20 +237,15 @@ class Agent:
         # Loop for each episode
         for episode in range(episodes):
             # Initialize S
-            pos = (random.randint(0, 3), random.randint(0, 3))
-            index = self.doolhof.coordsToIndex(pos)
-            state = self.doolhof.map[index[0]][index[1]]
+            self.state = self.doolhof.map[random.randrange(4)][random.randrange(4)]
+            index = self.doolhof.coordsToIndex(self.state.position)
             # Loop for each step of episode until S is terminal
-            while not state.done:
+            while not self.state.done:
                 # Choose A from S using policy derived from Q
                 action = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix[index[0]][index[1]])[0]
                 # Take action A, observe S'
-                nextPos = self.doolhof.action[action](pos)
-                nextIndex = self.doolhof.coordsToIndex(nextPos)
-                if not self.doolhof.canIGoThere(nextPos):
-                    nextPos = pos
-                    nextIndex = self.doolhof.coordsToIndex(nextPos)
-                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                nextState = self.doolhof.step(currentState=self.state, action=action)
+                nextIndex = self.doolhof.coordsToIndex(nextState.position)
                 # Take action A, observe R
                 reward = nextState.reward
                 # Q(S, A) <- Q(S, A) + alpha[R + discound * MAXa(Q(S', A)) - Q(S, A)]
@@ -268,9 +255,8 @@ class Agent:
                 # Update policy derived from Q
                 self.policy.updatePolicyMatrix(q, index, epsilon)
                 # S <- S'
-                state = copy.deepcopy(nextState)
+                self.state = copy.deepcopy(nextState)
                 index = copy.deepcopy(nextIndex)
-                pos = copy.deepcopy(nextPos)
         return q
 
     def sumQs(self, q1, q2):
@@ -303,20 +289,15 @@ class Agent:
         # Loop for each episode
         for episode in range(episodes):
             # Initialize S
-            pos = (random.randint(0, 3), random.randint(0, 3))
-            index = self.doolhof.coordsToIndex(pos)
-            state = self.doolhof.map[index[0]][index[1]]
+            self.state = self.doolhof.map[random.randrange(4)][random.randrange(4)]
+            index = self.doolhof.coordsToIndex(self.state.position)
             # Loop for each step of episode until S is terminal
-            while not state.done:
+            while not self.state.done:
                 # Choose A from S using the policy epsilon-greedy in Q1+Q2
                 action = random.choices(sorted(list(self.doolhof.action.keys())), self.policy.matrix[index[0]][index[1]])[0]
                 # Take action A, observe S'
-                nextPos = self.doolhof.action[action](pos)
-                nextIndex = self.doolhof.coordsToIndex(nextPos)
-                if not self.doolhof.canIGoThere(nextPos):
-                    nextPos = pos
-                    nextIndex = self.doolhof.coordsToIndex(nextPos)
-                nextState = self.doolhof.map[nextIndex[0]][nextIndex[1]]
+                nextState = self.doolhof.step(currentState=self.state, action=action)
+                nextIndex = self.doolhof.coordsToIndex(nextState.position)
                 # Take actionA, observe R
                 reward = nextState.reward
                 # With 0.5 probability:
@@ -335,9 +316,8 @@ class Agent:
                 # Update policy using Q1 + Q2
                 self.policy.updatePolicyMatrix(q, index, epsilon)
                 # S <- S'
-                state = copy.deepcopy(nextState)
+                self.state = copy.deepcopy(nextState)
                 index = copy.deepcopy(nextIndex)
-                pos = copy.deepcopy(nextPos)
         return q1, q2
 
     def __str__(self):
